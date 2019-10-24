@@ -9,6 +9,16 @@ import sys
 
 
 
+def calcRotScaleParm(rotData,transData,trainIdxs):
+    trans = transData[trainIdxs, :]
+    rot = rotData[trainIdxs, :]
+    trans_means = np.mean(trans, axis=0)
+    rot_means = np.mean(rot, axis=0)
+    scaleParm = abs(np.mean(trans_means) / np.mean(rot_means))
+    return scaleParm
+
+
+
 # Load Configuration
 configFile = None
 if len(sys.argv)>1:
