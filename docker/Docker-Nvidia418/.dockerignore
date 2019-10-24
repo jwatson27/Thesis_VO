@@ -1,0 +1,5 @@
+# ignore everything
+**
+# except the dockerfile and requirements
+!dockerfile
+!requirements.txt

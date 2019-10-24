@@ -1,0 +1,13 @@
+keras
+matplotlib
+scikit-learn
+h5py
+numpy==1.16.4
+opencv-contrib-python==3.3.0.9
+scikit-image
+tqdm
+pyyaml
+flake8
+jupyter
+pydot
+pandas

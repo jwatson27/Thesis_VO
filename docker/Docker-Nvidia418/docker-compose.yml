@@ -1,0 +1,17 @@
+version: '3.2'
+services:
+   deep-learning-with-python_service:
+      build:
+         context: .
+         args:
+            - USE_PYTHON_3_NOT_2=True
+         dockerfile: dockerfile
+      ports:
+         - 8888:8888
+      user: 1000:1000
+      volumes:
+         - "/tmp/.X11-unix:/tmp/.X11-unix"
+         - "/mnt/01D4B53BFED3AC50/Users/jwats:/windowsroot"
+         - "/home/jwatson27/thesis/clean_dataset/:/clean_dataset"
+         - "/home/jwatson27/thesis/results/:/opt/project/results"
+         - "/home/jwatson27/thesis/training/:/opt/project/training"

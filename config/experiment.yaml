@@ -1,0 +1,111 @@
+experiment:
+  name: &exp_name 'CNN_test_0'
+  thesisCfg: 'config/thesis.yaml'
+
+
+parameters:
+  kitti:
+    usedCams: [0]
+    usedSeqs: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+    prepared:
+      showPlots: False
+      showProg: True
+      downsampledImageShape: !!python/tuple [135, 480]
+
+      recalcTruth: False
+      recalcIMU: False
+      recalcStandardImages: False
+      recalcNormImages: True
+      recalcNormParms: False
+      reapplyDataNorm: False
+
+    imu:
+      arwError: 0.5 # deg/sqrt(hr) -- Based on Novatel UIMU-HG1700
+
+  training:
+    batchSize: 20
+    oversampTurnFrac: null
+    overwriteTrainEpochs: True
+    nextEpoch: -1
+    totalEpochs: 15
+    initLearningRate: 0.0001
+    verbosity: 1
+
+    constraints:
+      useIMU: False
+      useEpiRot: False
+      useEpiTrans: False
+
+    normalization:
+      useNormImages: True
+      useNormTruth: True
+      useNormIMU: True
+      useNormEpi: True
+
+
+
+    histFilename: 'history.hdf5'
+
+    callbacks:
+      checkpoint:
+        useCallback: True
+        filename: 'epoch_{epoch:03d}.h5'
+        verbosity: 1
+
+      earlyStopping:
+        useCallback: True
+        monitor: 'loss'
+        minChange: 1.e-5
+        patience: 10
+        verbosity: 0
+        baseline: null
+
+      reduceLR:
+        useCallback: True
+        monitor: 'loss'
+        factor: 0.1
+        patience: 10
+        verbosity: 0
+        minChange: 0.0001
+        cooldown: 5
+        minLR: 0
+
+      plotHistory:
+        useCallback: True
+        plotLossFigure: True
+        monitorList: null
+        windowSize: 10
+        title: null
+        xlabel: null
+        ylabel: null
+
+  model:
+    CNN_name: 'WatsonCNN_2'
+    dropout:
+      CNN: 0
+      VO: 0
+    numImageChannels: 1
+    numOutputs: 6
+    useIMUdata: False
+    defaultLossFunction: 'mean_squared_error'
+    lossRotScale: 1000
+    optimizerType: 'RMSprop'
+    modelYamlFilename: 'model_config.yaml'
+
+
+trainPaths:
+  checkpoint:
+    dir: ['thesis.pathsGeneral.trainRoot', *exp_name, 'training_epochs']
+    type: '.h5'
+  history:
+    dir: ['thesis.pathsGeneral.trainRoot', *exp_name, 'history']
+    type: '.hdf5'
+  model:
+    dir: ['thesis.pathsGeneral.trainRoot', *exp_name, 'model']
+    type: '.yaml'
+  diagrams:
+    dir: ['thesis.pathsGeneral.trainRoot', *exp_name, 'diagrams']
+    type: '.png'
+  normParms:
+    dir: ['thesis.pathsGeneral.trainRoot', *exp_name, 'normalized']
+    name: 'norm_parms.hdf5'
