@@ -3,7 +3,7 @@ from src.helpers.cfg import ThesisConfig
 
 
 # Parameters
-configFile = '/opt/project/exp_configs/CNN_test_0.yaml'
+configFile = 'exp_configs/CNN_test_0.yaml'
 
 config = ThesisConfig(configFile)
 nextEpoch = config.trainingParms['nextEpoch']
