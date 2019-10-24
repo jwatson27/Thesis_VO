@@ -103,6 +103,7 @@ class PlotHistory(keras.callbacks.Callback):
                  xlabel=None,
                  ylabel=None,
                  borderMult=0.2,
+                 blockProcessing=False,
                  **kargs):
         super().__init__(**kargs)
 
@@ -143,6 +144,7 @@ class PlotHistory(keras.callbacks.Callback):
         plt.show()
         self.figureNum = fig.number
         self.legendPlotted = False
+        self.blockProcessing = blockProcessing
 
 
     # things done on beginning of epoch
@@ -158,18 +160,23 @@ class PlotHistory(keras.callbacks.Callback):
                     history[key] = np.array(f[key])
                 self.history = history
 
-            if plt.fignum_exists(self.figureNum):
-                self.plotHistory()
-                self.updateWindowSize()
-                plt.draw()
+            if self.figExists():
+                self.plotHistory(epoch)
+                self.updateWindowSize(epoch)
+                if self.blockProcessing:
+                    plt.show(block=True)
+                else:
+                    plt.draw()
                 plt.pause(0.001)
 
+    def figExists(self):
+        return plt.fignum_exists(self.figureNum)
 
-    def plotHistory(self):
+    def plotHistory(self, currEpoch):
         if self.plotLossFigure:
-            self.plotLoss()
+            self.plotLoss(currEpoch)
         else:
-            self.plotAccuracy()
+            self.plotAccuracy(currEpoch)
         plt.title(self.title)
         plt.xlabel(self.xlabel)
         plt.ylabel(self.ylabel)
@@ -177,9 +184,9 @@ class PlotHistory(keras.callbacks.Callback):
             plt.legend()
             self.legendPlotted = True
 
-    def updateWindowSize(self):
+    def updateWindowSize(self, currEpoch):
         windowSize = self.windowSize
-        epochs = self.history['epochs']
+        epochs = self.history['epochs'][:currEpoch]
         numEpochs = len(epochs)
         borderMult = self.borderMult
 
@@ -203,28 +210,28 @@ class PlotHistory(keras.callbacks.Callback):
         plt.xlim(left=xmin-xborder, right=xmax+xborder)
         plt.ylim(bottom=ymin-yborder, top=ymax+yborder)
 
-    def plotLoss(self):
-        epochs = self.history['epochs']
+    def plotLoss(self, currEpoch):
+        epochs = self.history['epochs'][:currEpoch]
         lossTypes = ['loss', 'val_loss']
         lossValues = np.empty(shape=(0,len(epochs)))
         for monitor in self.monitor_list:
             if (monitor in lossTypes) and (monitor in self.history):
                 colorFmt = self.colorFormat(monitor)
                 dataLabel = self.dataLabel(monitor)
-                plt.plot(epochs, self.history[monitor], colorFmt, label=dataLabel)
-                lossValues = np.append(lossValues, [self.history[monitor]], axis=0)
+                plt.plot(epochs, self.history[monitor][:currEpoch], colorFmt, label=dataLabel)
+                lossValues = np.append(lossValues, [self.history[monitor][:currEpoch]], axis=0)
         self.lossValues = lossValues
 
-    def plotAccuracy(self):
-        epochs = self.history['epochs']
+    def plotAccuracy(self, currEpoch):
+        epochs = self.history['epochs'][:currEpoch]
         accTypes = ['acc', 'val_acc']
         accValues = np.empty(shape=(0,len(epochs)))
         for monitor in self.monitor_list:
             if (monitor in accTypes) and (monitor in self.history):
                 colorFmt = self.colorFormat(monitor)
                 dataLabel = self.dataLabel(monitor)
-                plt.plot(epochs, self.history[monitor], colorFmt, label=dataLabel)
-                accValues = np.append(accValues, [self.history[monitor]], axis=0)
+                plt.plot(epochs, self.history[monitor][:currEpoch], colorFmt, label=dataLabel)
+                accValues = np.append(accValues, [self.history[monitor][:currEpoch]], axis=0)
         self.accValues = accValues
 
     def dataLabel(self, monitor):
