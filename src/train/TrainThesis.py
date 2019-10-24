@@ -14,6 +14,7 @@ from src.helpers.training_helpers import getCallbacksList, getTrainAndValGenerat
 
 import tensorflow as tf
 from keras import backend as K
+import keras.losses
 
 # Supress TensorFlow Warnings
 tf.compat.v1.logging.set_verbosity(tf.compat.v1.logging.ERROR)
@@ -94,6 +95,7 @@ trainGen, valGen = getTrainAndValGenerators(config, numOutputs, targetImageSize,
 
 if numOutputs>3:
     lossFunc = scaledMSE_RT(lossRotScale)
+    keras.losses.lossFunction = lossFunc
 else:
     lossFunc = defaultLossFunc
 
