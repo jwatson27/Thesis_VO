@@ -2,9 +2,12 @@
 # DONE:
 # Configure code so that oversampling of turning/non-turning data can be turned on/off
 # Reconfigure dataGenerator to work with turning/non-turning data
+
+# DONE (October 16-23):
 # Scripts to Normalize All Data
 # Modify Generator to get normalized data
 
+# DONE (October 23-30):
 
 # TODO: Test Loss Function
 # TODO: Calculate Scale Parameter
