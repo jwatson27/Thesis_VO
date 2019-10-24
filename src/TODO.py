@@ -6,6 +6,11 @@
 # Modify Generator to get normalized data
 
 
+# TODO: Test Loss Function
+
+# TODO: Make wrapper for run experiment to run multiple config files
+# TODO: Make script to auto-generate multiple experiment config files for parameters sweeps
+
 
 # TODO: Custom Loss Function
 #   Just scaled rotation
