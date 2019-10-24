@@ -173,7 +173,6 @@ else:
 print()
 
 history = model.fit_generator(generator=trainGen,
-                              steps_per_epoch=1, # TODO: REMOVE
                               epochs=totalEpochs,
                               verbose=trainVerbosity,
                               callbacks=callbacksList,
