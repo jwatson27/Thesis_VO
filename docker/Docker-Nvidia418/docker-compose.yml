@@ -15,3 +15,4 @@ services:
          - "/home/jwatson27/thesis/clean_dataset/:/clean_dataset"
          - "/home/jwatson27/thesis/results/:/opt/project/results"
          - "/home/jwatson27/thesis/training/:/opt/project/training"
+         - "/home/jwatson27/thesis/exp_configs/:/opt/project/exp_configs"
