@@ -158,35 +158,37 @@ class DataGenerator(keras.utils.Sequence):
 
 
 
-            # Generate data
-            for pair_idx in image_pair_idxs_temp:
-                if self.useNormImages:
-                    with h5py.File(self.prev_img_files[pair_idx], 'r') as f:
-                        prev_img = np.array(f['image'])
-                    with h5py.File(self.next_img_files[pair_idx], 'r') as f:
-                        next_img = np.array(f['image'])
+        # Generate data
+        for pair_idx in image_pair_idxs_temp:
+            if self.useNormImages:
+                with h5py.File(self.prev_img_files[pair_idx], 'r') as f:
+                    prev_img = np.array(f['image'])
+                with h5py.File(self.next_img_files[pair_idx], 'r') as f:
+                    next_img = np.array(f['image'])
 
-                    if self.n_channels==3:
+                if len(prev_img.shape)<3 or not (self.n_channels == prev_img.shape[2]):
+                    prev_img = np.stack((prev_img,)*self.n_channels, axis=-1)
+                    next_img = np.stack((next_img,)*self.n_channels, axis=-1)
 
 
-                else:
-                    # Read image
-                    prev_img = cv.imread(self.prev_img_files[pair_idx])
-                    next_img = cv.imread(self.next_img_files[pair_idx])
+            else:
+                # Read image
+                prev_img = cv.imread(self.prev_img_files[pair_idx])
+                next_img = cv.imread(self.next_img_files[pair_idx])
 
-                    if self.n_channels==1:
-                        finalShape = tuple(np.append(np.array(self.dim), 1))
-                        prev_img = cv.cvtColor(prev_img, cv.COLOR_BGR2GRAY)
-                        prev_img = np.reshape(prev_img, finalShape)
-                        next_img = cv.cvtColor(next_img, cv.COLOR_BGR2GRAY)
-                        next_img = np.reshape(next_img, finalShape)
+                if self.n_channels==1:
+                    finalShape = tuple(np.append(np.array(self.dim), 1))
+                    prev_img = cv.cvtColor(prev_img, cv.COLOR_BGR2GRAY)
+                    prev_img = np.reshape(prev_img, finalShape)
+                    next_img = cv.cvtColor(next_img, cv.COLOR_BGR2GRAY)
+                    next_img = np.reshape(next_img, finalShape)
 
-                X_prev.append(prev_img)
-                X_next.append(next_img)
-                if self.imu_xyz is not None:
-                    X_imu.append(self.imu_xyz[pair_idx])
-                if self.epi_RT is not None:
-                    X_epi.append(self.epi_RT[pair_idx])
+            X_prev.append(prev_img)
+            X_next.append(next_img)
+            if self.imu_xyz is not None:
+                X_imu.append(self.imu_xyz[pair_idx])
+            if self.epi_RT is not None:
+                X_epi.append(self.epi_RT[pair_idx])
 
 
 
