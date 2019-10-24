@@ -83,23 +83,6 @@ def hms_time(time_delta):
     seconds -= minutes * 60
     return(hours, minutes, seconds)
 
-# def plotLoss(hist, name, noVal=False, start=0, end=None):
-#     loss = hist['loss']
-#     lr_changes = hist['lr_changes']
-#     lr_changes = lr_changes[np.where(lr_changes>start)[0]]
-#     if end is None:
-#         end = len(loss)
-#     if len(loss)>start:
-#         plt.plot(range(start, end), loss[start:end], 'bo', label='Training loss')
-#         if not noVal:
-#             val_loss = hist['val_loss']
-#             plt.plot(range(start, end), val_loss[start:end], 'r', label='Validation loss')
-#         # TODO: Plot changes on monitor loss
-#         plt.plot(lr_changes-1, loss[lr_changes-1], 'ko', label='LR Adjustments')
-#         plt.title('Training and validation loss, %s' % name)
-#         plt.xlabel('Epochs')
-#         plt.ylabel('Loss (MSE)')
-
 def round(values, decimals=2, dir='up'):
     add_amt = 1.5*(10**(-decimals))
     if dir == 'down':
