@@ -8,6 +8,7 @@
 
 # TODO: Test Loss Function
 
+
 # TODO: Make wrapper for run experiment to run multiple config files
 # TODO: Make script to auto-generate multiple experiment config files for parameters sweeps
 
@@ -29,7 +30,7 @@
 
 
 
-
+# TODO: Change norm params to yaml?
 
 # TODO: Research Quaternion Usage
 # TODO: Research Architectures
