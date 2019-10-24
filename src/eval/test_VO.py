@@ -10,10 +10,12 @@ import os
 
 from keras.utils import plot_model
 from src.helpers.dataGenerator import DataGenerator
-from src.prep.truthPoses_script import plotBirdsEye
+from src.prep.truthPoses_script import plotBirdsEye # TODO: Fix function
 from src.helpers.coframes import cvtToAbs, sph2cart, getT_s_d, cvtToDcm_sd, getRT_sd_ss2d, cvtToRpy_sd
 from src.helpers.helper_functions import load_model, load_history
 
+
+# TODO: Update testing to work with new config data
 # TODO: Update to work with config and turning/non-turning data
 
 windowsRoot = '/windowsroot'

@@ -1,6 +1,3 @@
-# TODO: Write script that normalizes input and output data
-#  distributions to be mean 0 and std 1 and save parameters
-
 import numpy as np
 from src.helpers.cfg import ThesisConfig
 from src.helpers.helper_functions import applyNorm, undoNorm, getH5pyData

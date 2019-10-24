@@ -128,7 +128,7 @@ class ThesisConfig:
                     files = [[file] for file in files]
                     retVals = {'files': np.array(files)}
                 else:
-                    files = [fldr]  # TODO: Maybe just make a 'dir' key with the folder
+                    files = [fldr]
                     retVals = {'folder': np.array(files)}
 
             elif 'name' in dictionary:
