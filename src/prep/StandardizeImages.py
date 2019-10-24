@@ -59,7 +59,7 @@ config = ThesisConfig(configFile)
 kittiSeqs        = config.kittiSeqs
 usedCams         = config.usedCams
 destImageShape   = config.thesisKittiParms['standardImageShape']
-recalcStandardImages = config.expKittiParms['prepared']['recalcStandardImages']
+recalcStandardImages = config.expKittiParms['prepared']['runPrep']['recalcStandardImages']
 showFigures      = config.expKittiParms['prepared']['showPlots']
 showProgress     = config.expKittiParms['prepared']['showProg']
 

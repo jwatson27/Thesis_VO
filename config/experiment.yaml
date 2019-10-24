@@ -12,12 +12,13 @@ parameters:
       showProg: True
       downsampledImageShape: !!python/tuple [135, 480]
 
-      recalcTruth: False
-      recalcIMU: False
-      recalcStandardImages: False
-      recalcNormImages: True
-      recalcNormParms: False
-      reapplyDataNorm: False
+      runPrep:
+        recalcTruth: False
+        recalcIMU: False
+        recalcStandardImages: False
+        recalcNormImages: False
+        recalcNormParms: False
+        reapplyDataNorm: False
 
     imu:
       arwError: 0.5 # deg/sqrt(hr) -- Based on Novatel UIMU-HG1700

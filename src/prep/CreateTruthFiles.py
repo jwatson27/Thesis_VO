@@ -18,7 +18,7 @@ config = ThesisConfig(configFile)
 # Parameters
 kittiSeqs       = config.kittiSeqs
 usedCams        = config.usedCams
-recalcTruthData = config.expKittiParms['prepared']['recalcTruth']
+recalcTruthData = config.expKittiParms['prepared']['runPrep']['recalcTruth']
 
 # Files
 poseFilesDict  = config.kittiOriginal['truth']

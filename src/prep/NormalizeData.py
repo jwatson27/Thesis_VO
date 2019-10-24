@@ -28,7 +28,7 @@ config = ThesisConfig(configFile)
 
 # Parameters
 usedSeqs = config.usedSeqs
-reapplyDataNorm = config.expKittiParms['prepared']['reapplyDataNorm']
+reapplyDataNorm = config.expKittiParms['prepared']['runPrep']['reapplyDataNorm']
 
 # Files
 splitFilesDict = config.kittiPrepared['split']

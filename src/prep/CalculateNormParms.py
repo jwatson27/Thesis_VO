@@ -32,7 +32,7 @@ config = ThesisConfig(configFile)
 
 # Parameters
 usedSeqs = config.usedSeqs
-recalcDataNorm = config.expKittiParms['prepared']['recalcNormParms']
+recalcDataNorm = config.expKittiParms['prepared']['runPrep']['recalcNormParms']
 
 
 # Files

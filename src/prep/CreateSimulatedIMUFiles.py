@@ -15,7 +15,7 @@ config = ThesisConfig(configFile)
 # Parameters
 kittiSeqs     = config.kittiSeqs
 usedCams      = config.usedCams
-recalcIMUData = config.expKittiParms['prepared']['recalcIMU']
+recalcIMUData = config.expKittiParms['prepared']['runPrep']['recalcIMU']
 
 # Files
 truthFilesDict = config.kittiPrepared['truth']
