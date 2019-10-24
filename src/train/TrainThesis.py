@@ -8,7 +8,8 @@ from keras.utils import plot_model
 from src.arch.VO_Models import buildDualHeadModel
 from src.helpers.cfg import ThesisConfig
 from src.helpers.helper_functions import getOptimizer
-from src.helpers.training_helpers import getCallbacksList, getTrainAndValGenerators, scaledMSE_RT
+from src.helpers.training_helpers import getCallbacksList, getTrainAndValGenerators
+from src.helpers.custom_loss import scaledMSE_RT
 
 
 

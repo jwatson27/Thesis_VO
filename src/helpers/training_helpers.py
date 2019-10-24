@@ -5,36 +5,6 @@ import h5py
 import numpy as np
 from src.helpers.dataGenerator import DataGenerator
 
-import keras.backend as K
-
-
-
-def scaledMSE_RT(rotScale=1000):
-
-    def lossFunction(y_true, y_pred):
-        print(y_true.shape)
-        print(y_pred.shape)
-
-        R_true, R_pred = y_true[:3], y_pred[:3]
-        R_mse = K.mean(K.square(R_true - R_pred))
-
-        T_true, T_pred = y_true[3:], y_pred[3:]
-        T_mse = K.mean(K.square(T_true - T_pred))
-
-        return K.sum(rotScale*R_mse + T_mse)
-
-    return lossFunction
-
-
-
-
-
-
-
-
-
-
-
 
 def getCallbacksList(config, historyFilepath, checkpointFilepath):
 
