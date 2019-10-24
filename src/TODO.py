@@ -7,6 +7,10 @@
 
 
 # TODO: Test Loss Function
+# TODO: Calculate Scale Parameter
+#   Look at papers and determine whether normalization is used with scale parameter or not
+#   Calculated value using the following
+#   Approx is 35
 
 
 # TODO: Make wrapper for run experiment to run multiple config files
