@@ -139,7 +139,7 @@ if (nextEpoch == 1):
                                           cnn_dropout=CNN_Dropout,
                                           cnn_type=CNN_Name,
                                           include_imu=useIMUData)
-    # TODO: Generalized Loss Function
+
     model.compile(optimizer=getOptimizer(optimizerType, lr=initLR), loss=lossFunc)
 
     # Save Yaml File for Model
