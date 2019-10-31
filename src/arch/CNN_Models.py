@@ -39,12 +39,12 @@ def buildCnnModel_2(image_shape, dropout=None):
     cnn_model = Model(inputs=[cnn_input], outputs=[cnn_output], name='CNN_Model')
     return cnn_model
 
-def buildFlowNet(image_shape):
+def buildFlowNet(image_shape):   # Should use:  64*19 x 64*5 == (1216x320)
     cnn_input = Input(shape=image_shape) # (1280 x 384 x 6)
     cnn_internal = cnn_input
-    cnn_internal = Conv2D(64,   (3,3), strides=2, padding='same', activation='relu')(cnn_internal)
-    cnn_internal = Conv2D(128,  (3,3), strides=2, padding='same', activation='relu')(cnn_internal)
-    cnn_internal = Conv2D(256,  (3,3), strides=2, padding='same', activation='relu')(cnn_internal)
+    cnn_internal = Conv2D(64,   (7,7), strides=2, padding='same', activation='relu')(cnn_internal)
+    cnn_internal = Conv2D(128,  (5,5), strides=2, padding='same', activation='relu')(cnn_internal)
+    cnn_internal = Conv2D(256,  (5,5), strides=2, padding='same', activation='relu')(cnn_internal)
     cnn_internal = Conv2D(256,  (3,3), strides=1, padding='same', activation='relu')(cnn_internal)
     cnn_internal = Conv2D(512,  (3,3), strides=2, padding='same', activation='relu')(cnn_internal)
     cnn_internal = Conv2D(512,  (3,3), strides=1, padding='same', activation='relu')(cnn_internal)
@@ -55,12 +55,14 @@ def buildFlowNet(image_shape):
     cnn_model = Model(inputs=[cnn_input], outputs=[cnn_output], name='FlowNet')
     return cnn_model
 
-def buildFlowNet_half(image_shape):
+
+
+def buildFlowNet_half(image_shape):  # Should use: 32*38 x 32*11 == (1216x352)
     cnn_input = Input(shape=image_shape) # (1280 x 384 x 3)
     cnn_internal = cnn_input
-    cnn_internal = Conv2D(32,  (3,3), strides=2, padding='same', activation='relu')(cnn_internal)
-    cnn_internal = Conv2D(64,  (3,3), strides=2, padding='same', activation='relu')(cnn_internal)
-    cnn_internal = Conv2D(128, (3,3), strides=2, padding='same', activation='relu')(cnn_internal)
+    cnn_internal = Conv2D(32,  (7,7), strides=2, padding='same', activation='relu')(cnn_internal)
+    cnn_internal = Conv2D(64,  (5,5), strides=2, padding='same', activation='relu')(cnn_internal)
+    cnn_internal = Conv2D(128, (5,5), strides=2, padding='same', activation='relu')(cnn_internal)
     cnn_internal = Conv2D(128, (3,3), strides=1, padding='same', activation='relu')(cnn_internal)
     cnn_internal = Conv2D(256, (3,3), strides=2, padding='same', activation='relu')(cnn_internal)
     cnn_internal = Conv2D(256, (3,3), strides=1, padding='same', activation='relu')(cnn_internal)
