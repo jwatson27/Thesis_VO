@@ -93,6 +93,8 @@ def round(values, decimals=2, dir='up'):
 def getOptimizer(type, **args):
     if (type=='RMSprop'):
         modelOptimizer = keras.optimizers.RMSprop(lr=args['lr'])
+    if (type=='Adam'):
+        modelOptimizer = keras.optimizers.Adam(learning_rate=args['lr'])
     return modelOptimizer
 
 
