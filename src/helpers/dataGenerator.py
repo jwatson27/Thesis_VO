@@ -151,8 +151,8 @@ class DataGenerator(keras.utils.Sequence):
         """Generates data containing batch_size samples."""
         # X : (n_samples, *dim, n_channels)
         # X = [np.empty((self.batch_size, self.dim[0], self.dim[1], self.n_channels))]
-        X_prev = []
-        X_next = []
+        X = []
+        X_pair = []
         X_imu = []
         X_epi = []
 
@@ -183,16 +183,14 @@ class DataGenerator(keras.utils.Sequence):
                     next_img = cv.cvtColor(next_img, cv.COLOR_BGR2GRAY)
                     next_img = np.reshape(next_img, finalShape)
 
-            X_prev.append(prev_img)
-            X_next.append(next_img)
+            image_pair = np.concatenate((prev_img, next_img), axis=-1)
+            X_pair.append(image_pair)
             if self.imu_xyz is not None:
                 X_imu.append(self.imu_xyz[pair_idx])
             if self.epi_RT is not None:
                 X_epi.append(self.epi_RT[pair_idx])
 
-
-
-        X = [np.array(X_prev), np.array(X_next)]
+        X.append(np.array(X_pair))
         if self.imu_xyz is not None:
             X.append(np.array(X_imu))
         if self.epi_RT is not None:
