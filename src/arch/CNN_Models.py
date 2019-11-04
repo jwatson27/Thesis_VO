@@ -88,7 +88,7 @@ def getCnnModel(image_shape, cnn_type=None, dropout=None):
         return buildCnnModel_2(image_shape, dropout)
     elif cnn_type == 'FlowNet':
         return buildFlowNet(image_shape)
-    elif cnn_type == 'FlowNet_half':
-        return buildFlowNet_half(image_shape)
+    # elif cnn_type == 'FlowNet_half':
+    #     return buildFlowNet_half(image_shape)
     else:
         return buildCnnModel_1(image_shape)
