@@ -21,7 +21,7 @@ datasets:
       splitFractions: [0.65, 0.2, 0.15]
       turnThreshold: 1 # deg
       standardImageShape: !!python/tuple [370, 1226]
-      normPixelRange: [-1, 1]
+      normPixelRange: [0, 1]
 
     paths:
       general:
