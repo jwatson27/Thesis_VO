@@ -26,7 +26,7 @@ datasets:
 
     paths:
       general:
-        kittiRoot: &kitti_root !!python/object/apply:os.path.join [*windows_root, 'Pictures/Kitti Odometry']
+        kittiRoot: &kitti_root !!python/object/apply:os.path.join [*windows_root, 'Pictures/Kitti_Odometry']
         kittiOrigTruth: &kitti_orig_truth !!python/object/apply:os.path.join [*kitti_root, 'data_odometry_poses/dataset/poses']
         kittiOrigGray: &kitti_orig_gray !!python/object/apply:os.path.join [*kitti_root, 'data_odometry_gray/dataset/sequences']
         kittiOrigColor: &kitti_orig_color !!python/object/apply:os.path.join [*kitti_root, 'data_odometry_color/dataset/sequences']
