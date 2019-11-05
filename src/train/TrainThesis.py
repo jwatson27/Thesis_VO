@@ -5,7 +5,7 @@ import numpy as np
 from keras.models import load_model, model_from_yaml
 from keras.utils import plot_model
 
-from src.arch.VO_Models import buildDualHeadModel
+from src.arch.VO_Models import buildModel
 from src.helpers.cfg import ThesisConfig
 from src.helpers.helper_functions import getOptimizer
 from src.helpers.training_helpers import getCallbacksList, getTrainAndValGenerators
@@ -60,6 +60,9 @@ numOutputs    = config.modelParms['numOutputs']
 useIMUData    = config.constraintParms['useIMU']
 useEpiRot     = config.constraintParms['useEpiRot']
 useEpiTrans   = config.constraintParms['useEpiTrans']
+imuLayerSize = config.constraintParms['imuLayerSize']
+epiRotLayerSize = config.constraintParms['epiRotLayerSize']
+epiTransLayerSize = config.constraintParms['epiTransLayerSize']
 defaultLossFunc = config.modelParms['defaultLossFunction']
 lossRotScale = config.modelParms['lossRotScale']
 optimizerType = config.modelParms['optimizerType']
@@ -133,12 +136,11 @@ elif (nextEpoch < currEpoch) and (not OVERWRITE_EPOCHS):
 
 if (nextEpoch == 1):
     # Build Model
-    model, cnn_model = buildDualHeadModel(imageShape,
-                                          numOutputs,
-                                          vo_dropout=VO_Dropout,
-                                          cnn_dropout=CNN_Dropout,
-                                          cnn_type=CNN_Name,
-                                          include_imu=useIMUData)
+    model, cnn_model = buildModel(imageShape, numOutputs, cnn_type=CNN_Name,
+                                  vo_dropout=VO_Dropout, cnn_dropout=CNN_Dropout,
+                                  include_imu=useIMUData, imu_dense_size=imuLayerSize,
+                                  include_epi_rot=useEpiRot, epi_rot_dense_size=epiRotLayerSize,
+                                  include_epi_trans=useEpiTrans, epi_trans_dense_size=epiTransLayerSize)
 
     model.compile(optimizer=getOptimizer(optimizerType, lr=initLR), loss=lossFunc)
 

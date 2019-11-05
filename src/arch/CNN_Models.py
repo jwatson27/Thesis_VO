@@ -51,7 +51,7 @@ def buildFlowNet(image_shape):   # Should use:  64*19 x 64*5 == (1216x320)
     cnn_internal = Conv2D(512,  (3,3), strides=2, padding='same', activation='relu')(cnn_internal)
     cnn_internal = Conv2D(512,  (3,3), strides=1, padding='same', activation='relu')(cnn_internal)
     cnn_internal = Conv2D(1024, (3,3), strides=2, padding='same')(cnn_internal)
-    cnn_output = cnn_internal
+    cnn_output = Dense(128, activation='relu')(cnn_internal)
     cnn_model = Model(inputs=[cnn_input], outputs=[cnn_output], name='FlowNet')
     return cnn_model
 
