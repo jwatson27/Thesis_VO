@@ -161,8 +161,8 @@ class PlotHistory(keras.callbacks.Callback):
                 self.history = history
 
             if self.figExists():
-                self.plotHistory(epoch)
-                self.updateWindowSize(epoch)
+                self.plotHistory(epoch+1)
+                self.updateWindowSize(epoch+1)
                 if self.blockProcessing:
                     plt.show(block=True)
                 else:
