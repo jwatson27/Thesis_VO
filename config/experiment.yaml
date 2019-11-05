@@ -28,14 +28,17 @@ parameters:
     oversampTurnFrac: null
     overwriteTrainEpochs: True
     nextEpoch: -1
-    totalEpochs: 15
-    initLearningRate: 0.0001
+    totalEpochs: 150
+    initLearningRate: 0.001
     verbosity: 1
 
     constraints:
       useIMU: False
+      imuLayerSize: 16
       useEpiRot: False
+      epiRotLayerSize: 16
       useEpiTrans: False
+      epiTransLayerSize: 16
 
     normalization:
       useNormImages: True
@@ -54,7 +57,7 @@ parameters:
         verbosity: 1
 
       earlyStopping:
-        useCallback: True
+        useCallback: False
         monitor: 'loss'
         minChange: 1.e-5
         patience: 10
@@ -81,16 +84,15 @@ parameters:
         ylabel: null
 
   model:
-    CNN_name: 'WatsonCNN_2'
+    CNN_name: 'FlowNet'
     dropout:
-      CNN: 0
-      VO: 0
-    numImageChannels: 1
+      CNN: null
+      VO: null
+    numImageChannels: 3
     numOutputs: 6
-    useIMUdata: False
     defaultLossFunction: 'mean_squared_error'
-    lossRotScale: 1000
-    optimizerType: 'RMSprop'
+    lossRotScale: 1
+    optimizerType: 'Adam'
     modelYamlFilename: 'model_config.yaml'
 
 
