@@ -10,7 +10,6 @@ parameters:
     prepared:
       showPlots: False
       showProg: True
-      downsampledImageShape: !!python/tuple [135, 480]
 
       runPrep:
         recalcTruth: False

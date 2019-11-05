@@ -35,6 +35,7 @@ K.set_session(tf.compat.v1.Session(config=cfg))
 configFile = None
 if len(sys.argv)>1:
     configFile = sys.argv[1]
+# configFile = 'exp_configs/CNN_test_0.yaml'
 config = ThesisConfig(configFile)
 
 
@@ -42,7 +43,7 @@ config = ThesisConfig(configFile)
 expName = config.experiment['experiment']['name']
 
 # Dataset
-targetImageSize = config.expKittiParms['prepared']['downsampledImageShape']
+targetImageSize = config.thesisKittiParms['downsampledImageShape']
 
 # Training
 OVERWRITE_EPOCHS = config.trainingParms['overwriteTrainEpochs']
@@ -174,7 +175,7 @@ else:
     print('Training Model for %s epochs (Epochs %s to %s)' % (numIters, nextEpoch, totalEpochs))
 print()
 
-history = model.fit_generator(generator=trainGen,
+history = model.fit_generator(generator=trainGen, # steps_per_epoch=1, validation_steps=1,
                               epochs=totalEpochs,
                               verbose=trainVerbosity,
                               callbacks=callbacksList,

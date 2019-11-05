@@ -16,7 +16,7 @@ config = ThesisConfig(configFile)
 kittiSeqs = config.kittiSeqs
 usedCams = config.usedCams
 normRange = config.thesisKittiParms['normPixelRange']
-destImageShape = config.expKittiParms['prepared']['downsampledImageShape']
+destImageShape = config.thesisKittiParms['downsampledImageShape']
 recalcNormImages = config.expKittiParms['prepared']['runPrep']['recalcNormImages']
 showProgress = config.expKittiParms['prepared']['showProg']
 
