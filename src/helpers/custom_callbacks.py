@@ -149,7 +149,7 @@ class PlotHistory(keras.callbacks.Callback):
 
     # things done on beginning of epoch
     def on_epoch_begin(self, epoch, logs={}):
-        return
+        self.on_epoch_end(epoch, logs)
 
     # things done on end of the epoch
     def on_epoch_end(self, epoch, logs={}):
@@ -195,7 +195,7 @@ class PlotHistory(keras.callbacks.Callback):
         else:
             values = self.accValues
 
-        xmax = numEpochs
+        xmax = epochs[-1]
         xmin = epochs[0]
         if (not windowSize is None) and (numEpochs > windowSize):
             values = values[:,-windowSize:]
