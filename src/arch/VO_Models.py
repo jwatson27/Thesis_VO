@@ -30,16 +30,18 @@ def buildModel(image_shape, num_outputs=6, cnn_type=None,
 
     # Get CNN Architecture
     # Pooling None means output is a 4D tensor avg or max means 2D tensor
-    internal_cnn = getCnnModel(image_shape, cnn_type, dropout=cnn_dropout)
-    internal_cnn.summary()
 
-    if cnn_type == 'FlowNet':
-        image_shape = tuple(np.append(np.array(image_shape[:-1]), 6))
+    if cnn_type == 'FlowNet' or cnn_type=='FlowNet_half' or cnn_type=='FlowNet_quarter':
+        image_shape = tuple(np.append(np.array(image_shape[:-1]), image_shape[-1]*2))
+        print(image_shape)
+        internal_cnn = getCnnModel(image_shape, cnn_type, dropout=cnn_dropout)
         out, input_layer = buildSingle(image_shape, internal_cnn)
         input_layers = [input_layer]
     else:
+        internal_cnn = getCnnModel(image_shape, cnn_type, dropout=cnn_dropout)
         merged_out, input_layers = buildDual(image_shape, internal_cnn)
     out = GlobalAveragePooling2D()(out)
+    internal_cnn.summary()
 
     if include_imu:
         imu_layer_size = imu_dense_size
