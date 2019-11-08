@@ -111,3 +111,9 @@ trainPaths:
   normParms:
     dir: ['thesis.pathsGeneral.trainRoot', *exp_name, 'normalized']
     name: 'norm_parms.hdf5'
+
+resultPaths:
+  figures:
+    dir: ['thesis.pathsGeneral.resultRoot', *exp_name, 'figures']
+  evaluations:
+    dir: ['thesis.pathsGeneral.resultRoot', *exp_name, 'evals']

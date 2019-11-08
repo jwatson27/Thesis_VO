@@ -2,7 +2,7 @@
 # and general parameters and consistent values
 pathsGeneral:
   trainRoot: &train_root '/opt/project/training'
-  resultsRoot: &results_root '/opt/project/results'
+  resultRoot: &result_root '/opt/project/results'
   windowsRoot: &windows_root '/windowsroot'
   cleanDataset: &clean_dataset '/clean_dataset'
 

@@ -56,6 +56,11 @@ class ThesisConfig:
         trainPaths = self.getFilenamesFromYamlDict(trainPaths)
         self.experiment['trainPaths'] = trainPaths
 
+        resultPaths = self.experiment['resultPaths']
+        resultPaths = self.fillInThesisReference(resultPaths, self.thesis)
+        resultPaths = self.getFilenamesFromYamlDict(resultPaths)
+        self.experiment['resultPaths'] = resultPaths
+
     def createPathShortcuts(self):
         # Thesis
         self.kitti = self.thesis['datasets']['kitti'] # Group
@@ -66,6 +71,7 @@ class ThesisConfig:
 
         # Experiment
         self.trainPaths = self.experiment['trainPaths']
+        self.resultPaths = self.experiment['resultPaths']
 
     def createParmShortcuts(self):
         # Thesis
