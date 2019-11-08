@@ -104,6 +104,7 @@ class PlotHistory(keras.callbacks.Callback):
                  ylabel=None,
                  borderMult=0.2,
                  blockProcessing=False,
+                 saveFigFile=None,
                  **kargs):
         super().__init__(**kargs)
 
@@ -145,7 +146,7 @@ class PlotHistory(keras.callbacks.Callback):
         self.figureNum = fig.number
         self.legendPlotted = False
         self.blockProcessing = blockProcessing
-
+        self.saveFigFile = saveFigFile
 
     # things done on beginning of epoch
     def on_epoch_begin(self, epoch, logs={}):
@@ -163,6 +164,8 @@ class PlotHistory(keras.callbacks.Callback):
             if self.figExists():
                 self.plotHistory(epoch+1)
                 self.updateWindowSize(epoch+1)
+                if self.saveFigFile is not None:
+                    plt.savefig(self.saveFigFile)
                 if self.blockProcessing:
                     plt.show(block=True)
                 else:
