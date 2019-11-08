@@ -5,13 +5,7 @@ pathsGeneral:
   resultRoot: &result_root '/opt/project/results'
   windowsRoot: &windows_root '/windowsroot'
   cleanDataset: &clean_dataset '/clean_dataset'
-
-
-resultPaths:
-  figures:
-    dir: !!python/object/apply:os.path.join [*results_root, 'figures']
-  evaluations:
-    dir: !!python/object/apply:os.path.join [*results_root, 'evals']
+  cleanDatasetNVME: &clean_nvme '/clean_nvme'
 
 
 datasets:
@@ -31,7 +25,7 @@ datasets:
         kittiOrigGray: &kitti_orig_gray !!python/object/apply:os.path.join [*kitti_root, 'data_odometry_gray/dataset/sequences']
         kittiOrigColor: &kitti_orig_color !!python/object/apply:os.path.join [*kitti_root, 'data_odometry_color/dataset/sequences']
         kittiPrep: &kitti_prep !!python/object/apply:os.path.join [*clean_dataset, 'kitti_odom']
-        kittiNorm: &kitti_norm !!python/object/apply:os.path.join [*clean_dataset, 'kitti_norm']
+        kittiNorm: &kitti_norm !!python/object/apply:os.path.join [*clean_nvme, 'kitti_norm']
         kittiOrigCameras: &orig_cams ['image_0', 'image_1', 'image_2', 'image_3']
         kittiSeqs: &seqs ['00', '01', '02', '03', '04', '05', '06', '07', '08', '09', '10']
         cameras: &new_cams ['cam_0', 'cam_1', 'cam_2', 'cam_3']
