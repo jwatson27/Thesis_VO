@@ -1,0 +1,88 @@
+FROM nvidia/cuda:9.0-devel-ubuntu16.04
+# FROM nvidia/cuda:9.0-cudnn7-devel-ubuntu16.04
+
+##Set environment variables
+ENV LANG=C.UTF-8 LC_ALL=C.UTF-8
+
+RUN apt-get update --fix-missing && apt-get install -y wget bzip2 ca-certificates \
+    build-essential \
+    byobu \
+    curl \
+    git-core \
+    htop \
+    pkg-config \
+    python3-dev \
+    python-pip \
+    python-setuptools \
+    python-virtualenv \
+    unzip \
+    && \
+apt-get clean && \
+rm -rf /var/lib/apt/lists/*
+
+RUN echo 'export PATH=/opt/conda/bin:$PATH' > /etc/profile.d/conda.sh && \
+    wget --quiet https://repo.continuum.io/archive/Anaconda3-5.2.0-Linux-x86_64.sh -O ~/anaconda.sh && \
+    /bin/bash ~/anaconda.sh -b -p /opt/conda && \
+    rm ~/anaconda.sh
+
+ENV PATH /opt/conda/bin:$PATH
+
+RUN pip --no-cache-dir install --upgrade \
+        altair \
+        sklearn-pandas && \
+	conda install tensorflow-gpu
+
+#Setup File System
+RUN mkdir NAS
+ENV HOME=/NAS
+ENV SHELL=/bin/bash
+VOLUME /NAS
+WORKDIR /NAS
+
+# RUN groupadd -g 999 pydev && \
+#        useradd -r -u 999 -g pydev nwesting2
+
+# ENV NVIDIA_VISIBLE_DEVICES=1
+# docker run -e "ENV NVIDIA_VISIBLE_DEVICES=1" dockerimage
+
+# RUN apt-get update && apt-get install -y libpam-ldap nscd
+
+RUN apt-get update && apt-get install -y openssh-server
+RUN mkdir /var/run/sshd
+RUN echo 'root:Password!123' | chpasswd
+# RUN echo 'nwesting2:Password!123' | chpasswd
+RUN sed -i 's/PermitRootLogin prohibit-password/PermitRootLogin yes/' /etc/ssh/sshd_config
+# RUN echo 'X11Forwarding yes' | tee -a /etc/ssh/sshd_config
+
+# SSH login fix. Otherwise user is kicked off after login
+RUN sed 's@session\s*required\s*pam_loginuid.so@session optional pam_loginuid.so@g' -i /etc/pam.d/sshd
+
+ENV NOTVISIBLE "in users profile"
+RUN echo "export VISIBLE=now" >> /etc/profile
+
+EXPOSE 22
+CMD ["/usr/sbin/sshd", "-D"]
+
+# THIS IS WHERE YOUR REQUIREMENTS.TXT CONTENT GOES
+RUN pip install tensorflow \
+	keras \
+	matplotlib \
+	scikit-learn \
+	h5py \
+	numpy==1.16.4 \
+	opencv-contrib-python==3.3.0.9 \
+	scikit-image \
+	tqdm \
+	pyyaml \
+	flake8\
+	scipy \
+	pydot==1.2.3 \
+	pydot_ng \
+	graphviz \
+	py3nvml
+RUN conda install matplotlib
+# Conda does not install required backends by default
+RUN apt-get install -y libgl1-mesa-glx
+
+# RUN chown nwesting2:pydev /NAS
+# USER jwatson

@@ -1,0 +1,18 @@
+version: "3"
+services:
+  deeplearning:
+    image:
+    volumes:
+      - "nfsnasmount:/NAS/"
+    ports:
+      - "3030:22"
+    environment:
+      NVIDIA_VISIBLE_DEVICES: 0,1
+
+volumes:
+  nfsnasmount:
+    driver: local
+    driver_opts:
+      type: nfs
+      o: addr=10.202.0.11
+      device: ":/volume1/homes/jwatson/"
