@@ -8,7 +8,7 @@ from keras.utils import plot_model
 from src.arch.VO_Models import buildModel
 from src.helpers.cfg import ThesisConfig
 from src.helpers.helper_functions import getOptimizer
-from src.helpers.training_helpers import getCallbacksList, getTrainAndValGenerators
+from src.helpers.training_helpers import getCallbacksList, getGenerator, getTrainAndValGenerators
 from src.helpers.custom_loss import scaledMSE_RT
 
 
@@ -95,7 +95,9 @@ history_filepath = os.path.join(saveHistoryPath, history_filename)
 callbacksList = getCallbacksList(config, history_filepath, checkpoint_filepath)
 
 # Create Generators
-trainGen, valGen = getTrainAndValGenerators(config, numOutputs, targetImageSize, numChannels)
+trainGen = getGenerator(config, numOutputs, targetImageSize, numChannels, genType='train')
+valGen   = getGenerator(config, numOutputs, targetImageSize, numChannels, genType='val')
+# trainGen, valGen = getTrainAndValGenerators(config, numOutputs, targetImageSize, numChannels)
 
 
 if numOutputs>3:
