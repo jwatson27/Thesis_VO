@@ -25,8 +25,8 @@ def buildDual(image_shape, cnn):
 def buildModel(image_shape, num_outputs=6, cnn_type=None,
                vo_dropout=None, cnn_dropout=None,
                include_imu=False, imu_dense_size=16,
-               include_epi_rot=False, epi_rot_dense_size=16,
-               include_epi_trans=False, epi_trans_dense_size=16):
+               include_epi_rot=False, include_epi_trans=False,
+               split_epi_layers=False, epi_dense_size=16, post_constraints_layer_size=0):
 
     # Get CNN Architecture
     # Pooling None means output is a 4D tensor avg or max means 2D tensor
@@ -50,11 +50,32 @@ def buildModel(image_shape, num_outputs=6, cnn_type=None,
         imu_output = Dense(imu_layer_size, activation='relu')(imu_input)
         out = Concatenate()([out, imu_output])
 
+    if include_epi_rot or include_epi_trans:
+        epi_layer_size = epi_dense_size
+        epi_rot_input = Input(shape=(3,))
+        epi_trans_input = Input(shape=(3,))
+        if include_epi_rot and include_epi_trans and not split_epi_layers:
+            input_layers.append(epi_rot_input)
+            input_layers.append(epi_trans_input)
+            epi_input = Concatenate()([epi_rot_input, epi_trans_input])
+            epi_output = Dense(epi_layer_size, activation='relu')(epi_input)
+            out = Concatenate()([out, epi_output])
+        else: # not both or split
+            if include_epi_rot:
+                input_layers.append(epi_rot_input)
+                epi_rot_output = Dense(epi_layer_size, activation='relu')(epi_rot_input)
+                out = Concatenate()([out, epi_rot_output])
+            if include_epi_trans:
+                input_layers.append(epi_trans_input)
+                epi_trans_output = Dense(epi_layer_size, activation='relu')(epi_trans_input)
+                out = Concatenate()([out, epi_trans_output])
 
-    if include_epi_rot:
-        pass
-    if include_epi_trans:
-        pass
+    if include_imu or include_epi_rot or include_epi_trans:
+        # Add extra dense layer
+        if not post_constraints_layer_size==0:
+            out = Dense(post_constraints_layer_size, activation='relu')(out)
+
+
 
     # Dropout layer
     if vo_dropout is not None:

@@ -62,8 +62,9 @@ useIMUData    = config.constraintParms['useIMU']
 useEpiRot     = config.constraintParms['useEpiRot']
 useEpiTrans   = config.constraintParms['useEpiTrans']
 imuLayerSize = config.constraintParms['imuLayerSize']
-epiRotLayerSize = config.constraintParms['epiRotLayerSize']
-epiTransLayerSize = config.constraintParms['epiTransLayerSize']
+epiLayerSize = config.constraintParms['epiLayerSize']
+splitEpiLayers = config.constraintParms['splitEpiLayers']
+postConstraintsLayerSize = config.constraintParms['postConstraintsLayerSize']
 defaultLossFunc = config.modelParms['defaultLossFunction']
 lossRotScale = config.modelParms['lossRotScale']
 optimizerType = config.modelParms['optimizerType']
@@ -142,8 +143,9 @@ if (nextEpoch == 1):
     model, cnn_model = buildModel(imageShape, numOutputs, cnn_type=CNN_Name,
                                   vo_dropout=VO_Dropout, cnn_dropout=CNN_Dropout,
                                   include_imu=useIMUData, imu_dense_size=imuLayerSize,
-                                  include_epi_rot=useEpiRot, epi_rot_dense_size=epiRotLayerSize,
-                                  include_epi_trans=useEpiTrans, epi_trans_dense_size=epiTransLayerSize)
+                                  include_epi_rot=useEpiRot, include_epi_trans=useEpiTrans,
+                                  split_epi_layers=splitEpiLayers, epi_dense_size=epiLayerSize,
+                                  post_constraints_layer_size=postConstraintsLayerSize)
 
     model.compile(optimizer=getOptimizer(optimizerType, lr=initLR), loss=lossFunc)
 
