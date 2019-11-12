@@ -1,8 +1,8 @@
 import numpy as np
 import cv2 as cv
 import matplotlib
-matplotlib.use('TkAgg')
-import matplotlib.pyplot as plt
+# matplotlib.use('TkAgg')
+# import matplotlib.pyplot as plt
 
 def cvtToRel(T_o_i):
     T_ip1_i = np.empty((0,4,4))
@@ -74,7 +74,7 @@ def sph2cart(rtp):
     xyz[:, 2] = rtp[:,0] * np.cos(rtp[:,1])
     return xyz
 
-def plotBirdsEye(T_o_i):
-    _, t_o_o2i = getRT_sd_ss2d(T_o_i)
-    x, _, z = getXYZ_ss2d(t_o_o2i)
-    plt.plot(x, z)
+# def plotBirdsEye(T_o_i):
+#     _, t_o_o2i = getRT_sd_ss2d(T_o_i)
+#     x, _, z = getXYZ_ss2d(t_o_o2i)
+#     plt.plot(x, z)
