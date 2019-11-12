@@ -100,6 +100,7 @@ def getTrainAndValGenerators(config, numOut, targetImgSize, numChan):
 
     # training
     batchSize   = config.trainingParms['batchSize']
+    valBatchSize = config.trainingParms['valBatchSize']
     oversampTurnFrac = config.trainingParms['oversampTurnFrac']
 
     # constraints
@@ -249,8 +250,173 @@ def getTrainAndValGenerators(config, numOut, targetImgSize, numChan):
                                     labels=truthData,
                                     frac_turn=None,
                                     imu_xyz=imuData,
-                                    batch_size=batchSize,
+                                    batch_size=valBatchSize,
                                     img_dim=targetImgSize,
                                     n_channels=numChan)
 
     return (trainGenerator, valGenerator)
+
+
+
+
+def getGenerator(config, numOut, targetImgSize, numChan, genType='train', batchSize=None, shuffleData=True):
+
+    # Parameters
+    # dataset
+    usedCams    = config.usedCams
+    usedSeqs    = config.usedSeqs
+
+    # training
+    if batchSize is None:
+        if genType == 'train':
+            batchSize   = config.trainingParms['batchSize']
+        if genType == 'val':
+            batchSize = config.trainingParms['valBatchSize']
+
+    oversampTurnFrac = None
+    if genType=='train':
+        oversampTurnFrac = config.trainingParms['oversampTurnFrac']
+
+    # constraints
+    useIMUData  = config.constraintParms['useIMU']
+    useEpiRot   = config.constraintParms['useEpiRot']
+    useEpiTrans = config.constraintParms['useEpiTrans']
+
+    # normalization
+    useNormImages = config.normalizationParms['useNormImages']
+    useNormTruth  = config.normalizationParms['useNormTruth']
+    useNormIMU    = config.normalizationParms['useNormIMU']
+    useNormEpi    = config.normalizationParms['useNormEpi']
+
+
+    # Files
+    truthFilesDict = config.kittiPrepared['truth']
+    imuFilesDict = config.kittiPrepared['imu']
+    epiFilesDict = config.kittiPrepared['epipolar']
+    normImageFilesDict = config.kittiNormalized['normImages']
+    normDataFilesDict  = config.kittiNormalized['normData']
+
+
+    # Split Indexes
+    splitFilesDict = config.kittiPrepared['split']
+    splitFile = config.getInputFiles(splitFilesDict)
+    with h5py.File(splitFile, 'r') as f:
+        if genType=='test':
+            turnIdxs = np.array(f['testTurnIdxs'])
+            nonTurnIdxs = np.array(f['testNonTurnIdxs'])
+        elif genType=='val':
+            turnIdxs = np.array(f['valTurnIdxs'])
+            nonTurnIdxs = np.array(f['valNonTurnIdxs'])
+        else:
+            turnIdxs = np.array(f['trainTurnIdxs'])
+            nonTurnIdxs = np.array(f['trainNonTurnIdxs'])
+
+
+
+    if useNormImages:
+        # Image Files - Normalized
+        firstImageNames = np.empty(0)
+        secondImageNames = np.empty(0)
+        for cam in usedCams:
+            for seq in usedSeqs:
+                imageNames = config.getInputFiles(normImageFilesDict, seq, cam)
+                firstImageNames = np.append(firstImageNames, imageNames[:-1], axis=0)
+                secondImageNames = np.append(secondImageNames, imageNames[1:], axis=0)
+
+    # Get Truth Data
+    truthData = np.empty((0,7))
+    if useNormTruth:
+        # Normalized
+        normDataFile = config.getInputFiles(normDataFilesDict)
+        with h5py.File(normDataFile, 'r') as f:
+            norm_rot_xyz = np.array(f['rot_xyz'])
+            norm_trans_xyz = np.array(f['trans_xyz'])
+            norm_trans_rtp = np.array(f['trans_rtp'])
+        norm_trans_scale = norm_trans_rtp[:, 0:1]
+        norm_rts = np.concatenate((norm_rot_xyz, norm_trans_xyz, norm_trans_scale), axis=1)
+        truthData = np.append(truthData, norm_rts, axis=0)
+    else:
+        # Original
+        for seq in usedSeqs:
+            truthFile = config.getInputFiles(truthFilesDict, seq)
+            with h5py.File(truthFile, 'r') as f:
+                rot_xyz = np.array(f['rot_xyz'])
+                trans_xyz = np.array(f['trans_xyz'])
+                trans_rtp = np.array(f['trans_rtp'])
+            trans_scale = trans_rtp[:, 0:1]
+            rts = np.concatenate((rot_xyz, trans_xyz, trans_scale), axis=1)
+            truthData = np.append(truthData, rts, axis=0)
+
+    if (numOut == 1):
+        # get magnitude
+        truthData = truthData[:, -1:]
+    elif (numOut == 3):
+        # get cartesian translation
+        truthData = truthData[:, -4:-1]
+    else:  # (numOut == 6)
+        # get rotation and cartesian translation
+        truthData = truthData[:, :-1]
+
+
+    imuData = None
+    if useIMUData:
+        # Get IMU Data
+        if useNormIMU:
+            normDataFile = config.getInputFiles(normDataFilesDict)
+            # Normalized
+            imuData = np.empty((0, 3))
+            with h5py.File(normDataFile, 'r') as f:
+                norm_imu_rot = np.array(f['noisy_rot_xyz'])
+            imuData = np.append(imuData, norm_imu_rot, axis=0)
+        else:
+            # Original
+            imuData = np.empty((0, 3))
+            for seq in usedSeqs:
+                imuFile = config.getInputFiles(imuFilesDict, seq)
+                with h5py.File(imuFile, 'r') as f:
+                    noisy_rot_xyz = np.array(f['noisy_rot_xyz'])
+                imuData = np.append(imuData, noisy_rot_xyz, axis=0)
+
+
+    epiData = None
+    if useEpiRot or useEpiTrans:
+        # TODO: Get Epipolar Data
+        epiData = np.empty((0,6))
+        if useNormEpi:
+            # TODO: Normalized
+            normDataFile = config.getInputFiles(normDataFilesDict)
+            with h5py.File(normDataFile, 'r') as f:
+                norm_epi_rot = np.array(f['epi_rot_xyz'])
+                norm_epi_trans = np.array(f['epi_trans_xyz'])
+            norm_epi_rt = np.concatenate((norm_epi_rot, norm_epi_trans), axis=1)
+            epiData = np.append(epiData, norm_epi_rt, axis=0)
+        else:
+            # TODO: Original
+            for seq in usedSeqs:
+                epiFile = config.getInputFiles(epiFilesDict, seq)
+                with h5py.File(epiFile, 'r') as f:
+                    epi_rot_xyz = np.array(f['epi_rot_xyz'])
+                    epi_trans_xyz = np.array(f['epi_trans_xyz'])
+                epi_rt = np.concatenate((epi_rot_xyz, epi_trans_xyz), axis=1)
+                epiData = np.append(epiData, epi_rt, axis=0)
+
+        if not useEpiRot:
+            epiData = epiData[:, 3:]
+        elif not useEpiTrans:
+            epiData = epiData[:, :3]
+
+
+    generator = DataGenerator(configData=config,
+                                    turn_idxs=turnIdxs,
+                                    nonturn_idxs=nonTurnIdxs,
+                                    prev_img_files=firstImageNames,
+                                    next_img_files=secondImageNames,
+                                    labels=truthData,
+                                    frac_turn=oversampTurnFrac,
+                                    imu_xyz=imuData,
+                                    batch_size=batchSize,
+                                    img_dim=targetImgSize,
+                                    n_channels=numChan,
+                                    shuffle=shuffleData)
+
+    return (generator)
