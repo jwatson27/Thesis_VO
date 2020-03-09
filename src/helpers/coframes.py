@@ -73,8 +73,3 @@ def sph2cart(rtp):
     # Z = R * cos (theta)
     xyz[:, 2] = rtp[:,0] * np.cos(rtp[:,1])
     return xyz
-
-# def plotBirdsEye(T_o_i):
-#     _, t_o_o2i = getRT_sd_ss2d(T_o_i)
-#     x, _, z = getXYZ_ss2d(t_o_o2i)
-#     plt.plot(x, z)

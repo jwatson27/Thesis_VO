@@ -5,8 +5,29 @@ import h5py
 import numpy as np
 
 # Load Configuration
-configFileList = ['exp_configs/CNN_test_4.yaml',
-                  'exp_configs/CNN_test_9.yaml']
+# configFileList = ['exp_configs/CNN_test_4.yaml',
+#                   'exp_configs/CNN_test_9.yaml',
+#                   'exp_configs/CNN_test_6.yaml',
+#                   'exp_configs/CNN_test_10.yaml']
+
+
+# configFileList = ['exp_configs/scale_test_1.yaml',
+#                   'exp_configs/scale_test_2.yaml',
+#                   'exp_configs/scale_test_3.yaml']
+#
+# configFileList = ['exp_configs/trans_test_1.yaml',
+#                   'exp_configs/trans_test_2.yaml',
+#                   'exp_configs/trans_test_3.yaml']
+#
+# configFileList = ['exp_configs/CNN_test_11.yaml',
+#                   'exp_configs/CNN_test_12.yaml',
+#                   'exp_configs/CNN_test_13.yaml',
+#                   'exp_configs/CNN_test_14.yaml',
+#                   'exp_configs/CNN_test_15.yaml',
+#                   'exp_configs/CNN_test_16.yaml',
+#                   'exp_configs/CNN_test_17.yaml']
+
+configFileList = ['exp_configs/scale_test_3.yaml']
 
 
 for configFile in configFileList:
@@ -43,3 +64,24 @@ for configFile in configFileList:
         print()
     else:
         print('History file does not exist for selected experiment')
+
+
+    # datasets = {}
+    # with h5py.File(history_filepath, 'r') as f:
+    #     for ds in f:
+    #         datasets[ds] = np.array(f[ds])
+    #
+    # epochs = datasets['epochs']
+    # loss = datasets['loss']
+    # val_loss = datasets['val_loss']
+    #
+    # epochs = epochs[:-1]
+    # loss = loss[:-1]
+    # val_loss = val_loss[:-1]
+    #
+    # epochs = np.array(epochs, dtype=np.int)
+    #
+    # with h5py.File(history_filepath, 'w') as f:
+    #     f.create_dataset('epochs', data=epochs)
+    #     f.create_dataset('loss', data=loss)
+    #     f.create_dataset('val_loss', data=val_loss)

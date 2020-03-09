@@ -81,6 +81,7 @@ class ThesisConfig:
         self.splitFracs = np.array(self.thesisKittiParms['splitFractions']) # PARAMETER
 
         # Experiment
+        self.expName = self.experiment['experiment']['name']
         self.expParms = self.experiment['parameters'] # Parm Group
         self.expKittiParms = self.expParms['kitti'] # Parm Group
         self.usedCams = np.array(self.expKittiParms['usedCams']) # PARAMETER
