@@ -4,6 +4,7 @@ import os
 import h5py
 import numpy as np
 from src.helpers.dataGenerator import DataGenerator
+from src.helpers.helper_functions import undoNorm, applyNorm, loadNormParms
 
 
 def getCallbacksList(config, historyFilepath, checkpointFilepath):
@@ -121,6 +122,8 @@ def getTrainAndValGenerators(config, numOut, targetImgSize, numChan):
     epiFilesDict = config.kittiPrepared['epipolar']
     normImageFilesDict = config.kittiNormalized['normImages']
     normDataFilesDict  = config.kittiNormalized['normData']
+    if 'normEpi' in config.kittiNormalized:
+        normEpiFilesDict = config.kittiNormalized['normEpi']
 
 
     # Split Indexes
@@ -200,32 +203,44 @@ def getTrainAndValGenerators(config, numOut, targetImgSize, numChan):
                 imuData = np.append(imuData, noisy_rot_xyz, axis=0)
 
 
-    epiData = None
-    if useEpiRot or useEpiTrans:
-        # TODO: Get Epipolar Data
-        epiData = np.empty((0,6))
+    epiRotData = None
+    if useEpiRot:
+        # Get Epipolar Rotation Data
+        epiRotData = np.empty((0,3))
         if useNormEpi:
-            # TODO: Normalized
-            normDataFile = config.getInputFiles(normDataFilesDict)
-            with h5py.File(normDataFile, 'r') as f:
+            # Normalized
+            normEpiFile = config.getInputFiles(normEpiFilesDict)
+            with h5py.File(normEpiFile, 'r') as f:
                 norm_epi_rot = np.array(f['epi_rot_xyz'])
-                norm_epi_trans = np.array(f['epi_trans_xyz'])
-            norm_epi_rt = np.concatenate((norm_epi_rot, norm_epi_trans), axis=1)
-            epiData = np.append(epiData, norm_epi_rt, axis=0)
+            epiRotData = np.append(epiRotData, norm_epi_rot, axis=0)
         else:
-            # TODO: Original
-            for seq in usedSeqs:
-                epiFile = config.getInputFiles(epiFilesDict, seq)
-                with h5py.File(epiFile, 'r') as f:
-                    epi_rot_xyz = np.array(f['epi_rot_xyz'])
-                    epi_trans_xyz = np.array(f['epi_trans_xyz'])
-                epi_rt = np.concatenate((epi_rot_xyz, epi_trans_xyz), axis=1)
-                epiData = np.append(epiData, epi_rt, axis=0)
+            # Original
+            for cam in usedCams:
+                for seq in usedSeqs:
+                    epiFile = config.getInputFiles(epiFilesDict, seq, cam)
+                    with h5py.File(epiFile, 'r') as f:
+                        epi_rot_xyz = np.array(f['epi_rot_xyz'])
+                    epiRotData = np.append(epiRotData, epi_rot_xyz, axis=0)
 
-        if not useEpiRot:
-            epiData = epiData[:, 3:]
-        elif not useEpiTrans:
-            epiData = epiData[:, :3]
+
+    epiTransData = None
+    if useEpiTrans:
+        # Get Epipolar Translation Data
+        epiTransData = np.empty((0,3))
+        if useNormEpi:
+            # Normalized
+            normEpiFile = config.getInputFiles(normEpiFilesDict)
+            with h5py.File(normEpiFile, 'r') as f:
+                norm_epi_trans = np.array(f['epi_trans_xyz'])
+            epiTransData = np.append(epiTransData, norm_epi_trans, axis=0)
+        else:
+            # Original
+            for cam in usedCams:
+                for seq in usedSeqs:
+                    epiFile = config.getInputFiles(epiFilesDict, seq, cam)
+                    with h5py.File(epiFile, 'r') as f:
+                        epi_trans_xyz = np.array(f['epi_trans_xyz'])
+                    epiTransData = np.append(epiTransData, epi_trans_xyz, axis=0)
 
 
 
@@ -238,6 +253,8 @@ def getTrainAndValGenerators(config, numOut, targetImgSize, numChan):
                                     labels=truthData,
                                     frac_turn=oversampTurnFrac,
                                     imu_xyz=imuData,
+                                    epi_rot=epiRotData,
+                                    epi_trans=epiTransData,
                                     batch_size=batchSize,
                                     img_dim=targetImgSize,
                                     n_channels=numChan)
@@ -250,6 +267,8 @@ def getTrainAndValGenerators(config, numOut, targetImgSize, numChan):
                                     labels=truthData,
                                     frac_turn=None,
                                     imu_xyz=imuData,
+                                    epi_rot=epiRotData,
+                                    epi_trans=epiTransData,
                                     batch_size=valBatchSize,
                                     img_dim=targetImgSize,
                                     n_channels=numChan)
@@ -259,7 +278,7 @@ def getTrainAndValGenerators(config, numOut, targetImgSize, numChan):
 
 
 
-def getGenerator(config, numOut, targetImgSize, numChan, genType='train', batchSize=None, shuffleData=True):
+def getGenerator(config, numOut, targetImgSize, numChan, genType='train', batchSize=None, shuffleData=True, imu_bias_error_dph=None, imu_sensor_error_dpsh=None):
 
     # Parameters
     # dataset
@@ -295,6 +314,8 @@ def getGenerator(config, numOut, targetImgSize, numChan, genType='train', batchS
     epiFilesDict = config.kittiPrepared['epipolar']
     normImageFilesDict = config.kittiNormalized['normImages']
     normDataFilesDict  = config.kittiNormalized['normData']
+    if 'normEpi' in config.kittiNormalized:
+        normEpiFilesDict = config.kittiNormalized['normEpi']
 
 
     # Split Indexes
@@ -378,32 +399,45 @@ def getGenerator(config, numOut, targetImgSize, numChan, genType='train', batchS
                 imuData = np.append(imuData, noisy_rot_xyz, axis=0)
 
 
-    epiData = None
-    if useEpiRot or useEpiTrans:
-        # TODO: Get Epipolar Data
-        epiData = np.empty((0,6))
-        if useNormEpi:
-            # TODO: Normalized
-            normDataFile = config.getInputFiles(normDataFilesDict)
-            with h5py.File(normDataFile, 'r') as f:
-                norm_epi_rot = np.array(f['epi_rot_xyz'])
-                norm_epi_trans = np.array(f['epi_trans_xyz'])
-            norm_epi_rt = np.concatenate((norm_epi_rot, norm_epi_trans), axis=1)
-            epiData = np.append(epiData, norm_epi_rt, axis=0)
-        else:
-            # TODO: Original
-            for seq in usedSeqs:
-                epiFile = config.getInputFiles(epiFilesDict, seq)
-                with h5py.File(epiFile, 'r') as f:
-                    epi_rot_xyz = np.array(f['epi_rot_xyz'])
-                    epi_trans_xyz = np.array(f['epi_trans_xyz'])
-                epi_rt = np.concatenate((epi_rot_xyz, epi_trans_xyz), axis=1)
-                epiData = np.append(epiData, epi_rt, axis=0)
 
-        if not useEpiRot:
-            epiData = epiData[:, 3:]
-        elif not useEpiTrans:
-            epiData = epiData[:, :3]
+    epiRotData = None
+    if useEpiRot:
+        # Get Epipolar Rotation Data
+        epiRotData = np.empty((0,3))
+        if useNormEpi:
+            # Normalized
+            normEpiFile = config.getInputFiles(normEpiFilesDict)
+            with h5py.File(normEpiFile, 'r') as f:
+                norm_epi_rot = np.array(f['epi_rot_xyz'])
+            epiRotData = np.append(epiRotData, norm_epi_rot, axis=0)
+        else:
+            # Original
+            for cam in usedCams:
+                for seq in usedSeqs:
+                    epiFile = config.getInputFiles(epiFilesDict, seq, cam)
+                    with h5py.File(epiFile, 'r') as f:
+                        epi_rot_xyz = np.array(f['epi_rot_xyz'])
+                    epiRotData = np.append(epiRotData, epi_rot_xyz, axis=0)
+
+
+    epiTransData = None
+    if useEpiTrans:
+        # Get Epipolar Translation Data
+        epiTransData = np.empty((0,3))
+        if useNormEpi:
+            # Normalized
+            normEpiFile = config.getInputFiles(normEpiFilesDict)
+            with h5py.File(normEpiFile, 'r') as f:
+                norm_epi_trans = np.array(f['epi_trans_xyz'])
+            epiTransData = np.append(epiTransData, norm_epi_trans, axis=0)
+        else:
+            # Original
+            for cam in usedCams:
+                for seq in usedSeqs:
+                    epiFile = config.getInputFiles(epiFilesDict, seq, cam)
+                    with h5py.File(epiFile, 'r') as f:
+                        epi_trans_xyz = np.array(f['epi_trans_xyz'])
+                    epiTransData = np.append(epiTransData, epi_trans_xyz, axis=0)
 
 
     generator = DataGenerator(configData=config,
@@ -414,6 +448,8 @@ def getGenerator(config, numOut, targetImgSize, numChan, genType='train', batchS
                                     labels=truthData,
                                     frac_turn=oversampTurnFrac,
                                     imu_xyz=imuData,
+                                    epi_rot=epiRotData,
+                                    epi_trans=epiTransData,
                                     batch_size=batchSize,
                                     img_dim=targetImgSize,
                                     n_channels=numChan,

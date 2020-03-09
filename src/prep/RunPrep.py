@@ -15,6 +15,7 @@ if configFile is not None:
 
 scripts = ['src/prep/CreateTruthFiles',
            'src/prep/CreateSimulatedIMUFiles',
+            'src/prep/CreateEpipolarFiles',
            'src/prep/StandardizeImages',
            'src/prep/DownAndNormImages',
            'src/prep/SplitKittiData',

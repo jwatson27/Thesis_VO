@@ -11,8 +11,9 @@ class DataGenerator(keras.utils.Sequence):
 
     def __init__(self, configData, turn_idxs, nonturn_idxs,
                  prev_img_files, next_img_files, labels,
-                 frac_turn=None, imu_xyz=None, epi_RT=None,
-                 batch_size=32, img_dim=(135, 480), n_channels=1, shuffle=True):
+                 frac_turn=None, imu_xyz=None, epi_rot=None, epi_trans=None,
+                 batch_size=32, img_dim=(135, 480), n_channels=1, shuffle=True,
+                 imu_bias=None, imu_rot_parms=None):
         """Initialization.
         Args:
             img_files: A list of path to image files.
@@ -37,7 +38,12 @@ class DataGenerator(keras.utils.Sequence):
 
         # constraints
         self.imu_xyz = imu_xyz
-        self.epi_RT = epi_RT
+        self.epi_rot = epi_rot
+        self.epi_trans = epi_trans
+
+        # errors
+        self.imu_bias = imu_bias
+        self.imu_norm_parms = imu_rot_parms
 
         # Generator Info
         self.batch_size = batch_size
@@ -154,7 +160,8 @@ class DataGenerator(keras.utils.Sequence):
         X = []
         X_pair = []
         X_imu = []
-        X_epi = []
+        X_epi_rot = []
+        X_epi_trans = []
 
 
 
@@ -187,14 +194,18 @@ class DataGenerator(keras.utils.Sequence):
             X_pair.append(image_pair)
             if self.imu_xyz is not None:
                 X_imu.append(self.imu_xyz[pair_idx])
-            if self.epi_RT is not None:
-                X_epi.append(self.epi_RT[pair_idx])
+            if self.epi_rot is not None:
+                X_epi_rot.append(self.epi_rot[pair_idx])
+            if self.epi_trans is not None:
+                X_epi_trans.append(self.epi_trans[pair_idx])
 
         X.append(np.array(X_pair))
         if self.imu_xyz is not None:
             X.append(np.array(X_imu))
-        if self.epi_RT is not None:
-            X.append(np.array(X_epi))
+        if self.epi_rot is not None:
+            X.append(np.array(X_epi_rot))
+        if self.epi_trans is not None:
+            X.append(np.array(X_epi_trans))
 
 
         # Read in truth data for each image pair based on indexes

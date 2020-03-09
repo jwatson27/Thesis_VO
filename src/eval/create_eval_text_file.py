@@ -6,7 +6,7 @@ from src.helpers.dataGenerator import DataGenerator
 
 from src.helpers.training_helpers import getGenerator
 import numpy as np
-from src.helpers.helper_functions import undoNorm
+from src.helpers.helper_functions import undoNorm, loadNormParms, getBestValLoss
 import h5py
 import os
 
@@ -30,6 +30,8 @@ numOutputs      = config.modelParms['numOutputs']
 defaultLossFunc = config.modelParms['defaultLossFunction']
 lossRotScale    = config.modelParms['lossRotScale']
 useIMUData  = config.constraintParms['useIMU']
+useEpiRot   = config.constraintParms['useEpiRot']
+useEpiTrans = config.constraintParms['useEpiTrans']
 targetImageSize = config.thesisKittiParms['downsampledImageShape']
 numChannels   = config.modelParms['numImageChannels']
 
@@ -41,19 +43,11 @@ imuFilesDict = config.kittiPrepared['imu']
 epiFilesDict = config.kittiPrepared['epipolar']
 normImageFilesDict = config.kittiNormalized['normImages']
 normDataFilesDict  = config.kittiNormalized['normData']
+if 'normEpi' in config.kittiNormalized:
+    normEpiFilesDict = config.kittiNormalized['normEpi']
 
-history_filename = config.trainingParms['histFilename']
-historyFilesDict = config.trainPaths['history']
-history_filepath = config.getInputFiles(historyFilesDict)
-
-with h5py.File(history_filepath, 'r') as f:
-    epochs = np.array(f['epochs'], dtype=np.int)
-    numEpochs = len(epochs)
-    if 'val_loss' in f:
-        val_loss = np.array(f['val_loss'])
-        min_val_loss = np.min(val_loss)
-        min_val_loss_epoch = (epochs[np.argmin(val_loss)])
-        print('Min Validation Loss: %s, Epoch %s' % (min_val_loss, min_val_loss_epoch))
+min_val_loss, min_val_epoch = getBestValLoss(config)
+print('Min Validation Loss: %s, Epoch %s' % (min_val_loss, min_val_epoch))
 
 # Loss Function
 if numOutputs>3:
@@ -66,7 +60,7 @@ else:
 # Model Epoch Selection
 checkpointFiles = config.getInputFiles(checkpointFilesDict)
 checkpointFolder = config.getFolderRef(checkpointFiles)
-checkpointFile = 'epoch_%03d%s' % (min_val_loss_epoch, checkpointFilesDict['type'])
+checkpointFile = 'epoch_%03d%s' % (min_val_epoch, checkpointFilesDict['type'])
 modelFile = os.path.join(checkpointFolder, checkpointFile)
 model = load_model(modelFile)
 
@@ -108,7 +102,25 @@ if useIMUData:
         norm_imu_rot = np.array(f['noisy_rot_xyz'])
     imuData = np.append(imuData, norm_imu_rot, axis=0)
 
-# TODO: Add epipolar data
+epiRotData = None
+if useEpiRot:
+    # Get Epipolar Rotation Data
+    epiRotData = np.empty((0,3))
+    # Normalized
+    normEpiFile = config.getInputFiles(normEpiFilesDict)
+    with h5py.File(normEpiFile, 'r') as f:
+        norm_epi_rot = np.array(f['epi_rot_xyz'])
+    epiRotData = np.append(epiRotData, norm_epi_rot, axis=0)
+
+epiTransData = None
+if useEpiTrans:
+    # Get Epipolar Translation Data
+    epiTransData = np.empty((0,3))
+    # Normalized
+    normEpiFile = config.getInputFiles(normEpiFilesDict)
+    with h5py.File(normEpiFile, 'r') as f:
+        norm_epi_trans = np.array(f['epi_trans_xyz'])
+    epiTransData = np.append(epiTransData, norm_epi_trans, axis=0)
 
 
 
@@ -116,8 +128,8 @@ if useIMUData:
 imgPairIdxs = list(range(len(firstImageNames)))
 testSeqDataGen = DataGenerator(configData=config, turn_idxs=imgPairIdxs[:2], nonturn_idxs=imgPairIdxs[2:],
               prev_img_files=firstImageNames, next_img_files=secondImageNames, labels=truthData,
-              frac_turn=None, imu_xyz=imuData, epi_RT=None, batch_size=1, img_dim=targetImageSize,
-              n_channels=numChannels, shuffle=False)
+              frac_turn=None, imu_xyz=imuData, epi_rot=epiRotData, epi_trans=epiTransData,
+              batch_size=1, img_dim=targetImageSize, n_channels=numChannels, shuffle=False)
 
 
 
