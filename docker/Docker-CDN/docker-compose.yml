@@ -1,9 +1,10 @@
 version: "3"
 services:
   deeplearning:
-    image:
+    image: "jwatson/thesis_env12:latest"
     volumes:
       - "nfsnasmount:/NAS/"
+      - "clean_dataset:/clean_nvme/"
     ports:
       - "3030:22"
     environment:
@@ -16,3 +17,9 @@ volumes:
       type: nfs
       o: addr=10.202.0.11
       device: ":/volume1/homes/jwatson/"
+  clean_dataset:
+    driver: local
+    driver_opts:
+      type: nfs
+      o: addr=10.202.0.11
+      device: ":/volume1/homes/jwatson/clean_dataset"

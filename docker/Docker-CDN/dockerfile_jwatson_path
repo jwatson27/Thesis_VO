@@ -17,9 +17,6 @@ RUN apt-get update --fix-missing && apt-get install -y wget bzip2 ca-certificate
     python-setuptools \
     python-virtualenv \
     unzip \
-    libsm6 \
-    libxext6 \
-    libxrender-dev \
     && \
 apt-get clean && \
 rm -rf /var/lib/apt/lists/*
@@ -30,6 +27,7 @@ RUN echo 'export PATH=/opt/conda/bin:$PATH' > /etc/profile.d/conda.sh && \
     rm ~/anaconda.sh
 
 ENV PATH /opt/conda/bin:$PATH
+ENV PATH /home/jwatson:$PATH
 
 
 RUN pip --no-cache-dir install --upgrade \
@@ -69,7 +67,7 @@ EXPOSE 22
 CMD ["/usr/sbin/sshd", "-D"]
 
 # THIS IS WHERE YOUR REQUIREMENTS.TXT CONTENT GOES
-RUN pip install tensorflow \
+RUN pip3 install tensorflow \
 	keras \
 	matplotlib \
 	scikit-learn \
