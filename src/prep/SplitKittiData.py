@@ -4,35 +4,7 @@ import h5py
 import os
 import sys
 from src.helpers.cfg import ThesisConfig
-
-def getCumSeqStarts(seqlens):
-    variable = 10
-    seqStarts = np.insert(seqlens, 0, 0)[:-1]
-    cumSeqStarts = np.cumsum(seqStarts)
-    return cumSeqStarts
-
-def cvtToSeqs(indices, seqLens):
-    cumSeqStarts = getCumSeqStarts(seqLens)
-    seqs = [[] for _ in range(len(cumSeqStarts))]
-    for idx in indices:
-        seqNum = np.where(idx>=cumSeqStarts)[0][-1]
-        idxVal = idx - cumSeqStarts[seqNum]
-        seqs[seqNum].append(idxVal)
-    return seqs
-
-def cvtSeqIdxsToAbsIdxs(seqIdxs, seqNum):
-    cumSeqStarts = getCumSeqStarts(totalSeqCounts)
-    absIdxs = seqIdxs+cumSeqStarts[seqNum]
-    return absIdxs
-
-def cvtToIdxs(seqList, seqLens):
-    cumSeqStarts = getCumSeqStarts(seqLens)
-    idxs = np.empty((0), dtype=np.int)
-    for i, seqVals in enumerate(seqList):
-        if seqVals.tolist():
-            absIndexes = cvtSeqIdxsToAbsIdxs(seqVals, i)
-            idxs = np.append(idxs, absIndexes)
-    return idxs
+from src.helpers.kitti_helpers import IndexConverter
 
 
 # TODO: Handle multiple cameras
@@ -67,33 +39,18 @@ if splitFile is None:
 
 # Check if file exists
 # Get Sequences Counts and Turning Indexes
-totalSeqCounts = []
-turnSeqCounts = []
-turnIdxs = []
+truthFilesList = []
 for seq in usedSeqs:
-    truthFile = config.getInputFiles(truthFilesDict, seq)
-    if truthFile is None:
-        sys.exit()
+    truthFilesList.append(config.getInputFiles(truthFilesDict, seq))
 
-    with h5py.File(truthFile, 'r') as f:
-        rot_xyz = np.array(f['rot_xyz'])
-        total = len(rot_xyz)
-        totalSeqCounts.append(total)
-        turningIdxs = np.where(np.abs(rot_xyz[:,1]) > turnThresh_rad)[0]
-        turnIdxs.append(turningIdxs)
-        turn = len(turningIdxs)
-        turnSeqCounts.append(turn)
 
-totalSeqCounts = np.array(totalSeqCounts)
-turnSeqCounts = np.array(turnSeqCounts)
-nonTurnSeqCounts = totalSeqCounts - turnSeqCounts
-
+idxCvt = IndexConverter(truthFilesList, turnThresh_rad)
 
 
 # SPLIT TURNING INDEXES
 
 # Convert seq turning indexes to absolute indexes
-turnAbsIdxs = cvtToIdxs(turnIdxs, totalSeqCounts)
+turnAbsIdxs = idxCvt.cvtToIdxs(idxCvt.turnIdxs)
 
 # Determine total number of image pair indexes for turning
 numTurn = len(turnAbsIdxs)
@@ -121,7 +78,7 @@ valTurnAbsIdxs = randTurnIdxs[numTrainTurn:]
 # SPLIT NON-TURNING INDEXES
 
 # Convert seq non-turning indexes to absolute indexes
-absIdxs = np.array(range(np.sum(totalSeqCounts)))
+absIdxs = np.array(range(np.sum(idxCvt.totalSeqCounts)))
 nonTurnAbsIdxs = np.setdiff1d(absIdxs, turnAbsIdxs)
 
 # Determine total number of image pair indexes for non-turning
@@ -161,7 +118,7 @@ with h5py.File(splitFile, 'w') as f:
 
 
 # Check Values - DEBUGGING
-numTotal = sum(totalSeqCounts)
+numTotal = sum(idxCvt.totalSeqCounts)
 print('Turning')
 print(numTrainTurn, numValTurn, numTestTurn)
 print(len(trainTurnAbsIdxs), len(valTurnAbsIdxs), len(testTurnAbsIdxs))

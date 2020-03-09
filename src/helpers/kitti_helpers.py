@@ -1,6 +1,7 @@
 # Helper functions for input/output related to the Kitti dataset
 
 import numpy as np
+import h5py
 
 def readCalFile(file: str):
     '''
@@ -45,3 +46,65 @@ def getPoses(posefile):
             values = np.reshape(values,(3,4))
             poses = np.append(poses, [values], axis=0)
     return poses
+
+
+
+
+class IndexConverter():
+    def __init__(self, truthFilesList, turnThresh_rad=None):
+        self.truthFilesList = truthFilesList
+        self.turnThresh_rad = turnThresh_rad
+        self.getSeqCounts()
+        self.getCumSeqStarts()
+
+    def getSeqCounts(self):
+        totalSeqCounts = []
+        turnSeqCounts = []
+        turnIdxs = []
+
+        for truthFile in self.truthFilesList:
+            with h5py.File(truthFile, 'r') as f:
+                rot_xyz = np.array(f['rot_xyz'])
+                total = len(rot_xyz)
+                totalSeqCounts.append(total)
+
+                if self.turnThresh_rad is not None:
+                    turningIdxs = np.where(np.abs(rot_xyz[:, 1]) > self.turnThresh_rad)[0]
+                    turnIdxs.append(turningIdxs)
+                    turn = len(turningIdxs)
+                    turnSeqCounts.append(turn)
+
+        totalSeqCounts = np.array(totalSeqCounts)
+        self.totalSeqCounts = totalSeqCounts
+
+        if self.turnThresh_rad is not None:
+            turnSeqCounts = np.array(turnSeqCounts)
+            self.turnSeqCounts = turnSeqCounts
+            self.nonTurnSeqCounts = self.totalSeqCounts - self.turnSeqCounts
+            self.turnIdxs = turnIdxs
+
+
+    def getCumSeqStarts(self):
+        seqLens = self.totalSeqCounts
+        seqStarts = np.insert(seqLens, 0, 0)[:-1]
+        cumSeqStarts = np.cumsum(seqStarts)
+        self.cumSeqStarts = cumSeqStarts
+
+
+    def cvtToSeqs(self, indices):
+        seqs = [[] for _ in range(len(self.cumSeqStarts))]
+        for idx in indices:
+            seqNum = np.where(idx>=self.cumSeqStarts)[0][-1]
+            idxVal = idx - self.cumSeqStarts[seqNum]
+            seqs[seqNum].append(idxVal)
+        return seqs
+
+    def cvtToIdxs(self, seqLists):
+        idxs = np.empty((0), dtype=np.int)
+        for seqNum, seqIdxs in enumerate(seqLists):
+            if len(seqIdxs):
+                absIdxs = seqIdxs + self.cumSeqStarts[seqNum]
+                idxs = np.append(idxs, absIdxs)
+        return idxs
+
+
