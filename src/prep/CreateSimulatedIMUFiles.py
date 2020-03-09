@@ -48,7 +48,7 @@ for cam in usedCams:
 
         # Read in rotation truth poses
         with h5py.File(truthFile, 'r') as f:
-            rot_xyz = np.array(f['rot_xyz'])
+            rot_xyz = np.array(f['rot_xyz'])    # radians
 
         # Add noise to rotation piece
         noise_xyz = np.random.randn(rot_xyz.shape[0], rot_xyz.shape[1])

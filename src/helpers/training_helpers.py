@@ -389,6 +389,82 @@ def getGenerator(config, numOut, targetImgSize, numChan, genType='train', batchS
             with h5py.File(normDataFile, 'r') as f:
                 norm_imu_rot = np.array(f['noisy_rot_xyz'])
             imuData = np.append(imuData, norm_imu_rot, axis=0)
+
+            if imu_bias_error_dph is not None:
+                # TODO: Figure out bias error units and calculation
+                # sampleRate = config.thesisKittiParms['sampleRate']
+                # imu_bias_error = imu_bias_error_dph * np.pi/180 * 1/3600 * 1/sampleRate # b (deg/hr) * pi/180 (rad/deg) * 1/3600 (hr/sec) * sec = b*pi/180*1/3600 (rad)
+
+                # # Apply Error
+                # normParmsFilesDict = config.kittiNormalized['normParms']
+                # normParmsFile = config.getInputFiles(normParmsFilesDict)
+                # imu_rot_parms = loadNormParms(normParmsFile, 'noisy_rot_xyz')
+
+                # imuData_unnorm = undoNorm(imuData, imu_rot_parms) # denormalize
+                # imuData_biased = imuData_unnorm + imu_bias_error # add error
+                # imuData_biased_norm = applyNorm(imuData_biased, imu_rot_parms) # renormalize
+                # imuData = imuData_biased_norm
+
+
+
+
+                # Calculate sensor error values
+                sampleRate = config.thesisKittiParms['sampleRate']
+                imu_bias_error = imu_bias_error_dph * np.pi / 180 * 1 / 3600 * 1 / sampleRate  # b (deg/hr) * pi/180 (rad/deg) * 1/3600 (hr/sec) * sec = b*pi/180*1/3600 (rad)
+
+                # Get truth data
+                normDataFile = config.getInputFiles(normDataFilesDict)
+                with h5py.File(normDataFile, 'r') as f:
+                    norm_rot_xyz = np.array(f['rot_xyz'])
+
+                # Get normalization parameters
+                normParmsFilesDict = config.kittiNormalized['normParms']
+                normParmsFile = config.getInputFiles(normParmsFilesDict)
+                truth_rot_parms = loadNormParms(normParmsFile, 'rot_xyz')
+
+                rot_xyz = undoNorm(norm_rot_xyz, truth_rot_parms)  # denormalize
+
+                # Add sensor error to truth data rotations based on error values given
+                imuData_biased = rot_xyz + imu_bias_error  # add error
+
+                # Renormalize data based on IMU parameters
+                imu_rot_parms = loadNormParms(normParmsFile, 'noisy_rot_xyz')
+                imuData_biased_norm = applyNorm(imuData_biased, imu_rot_parms)  # renormalize
+                imuData = imuData_biased_norm
+
+
+
+
+
+            if imu_sensor_error_dpsh is not None:
+                # Calculate sensor error values
+                sampleRate = config.thesisKittiParms['sampleRate']
+
+                angular_std = np.sqrt(imu_sensor_error_dpsh**2 * 1/3600 * 1/sampleRate) * np.pi/180  # radians
+
+                # Get truth data
+                normDataFile = config.getInputFiles(normDataFilesDict)
+                with h5py.File(normDataFile, 'r') as f:
+                    norm_rot_xyz = np.array(f['rot_xyz'])
+
+                # Get normalization parameters
+                normParmsFilesDict = config.kittiNormalized['normParms']
+                normParmsFile = config.getInputFiles(normParmsFilesDict)
+                truth_rot_parms = loadNormParms(normParmsFile, 'rot_xyz')
+
+                # Denormalize data based on truth parameters
+                rot_xyz = undoNorm(norm_rot_xyz, truth_rot_parms)  # denormalize
+
+                # Add sensor error to truth data rotations based on error values given
+                np.random.seed(1)
+                noise_xyz = np.random.randn(rot_xyz.shape[0], rot_xyz.shape[1])
+                imuData_noisy = rot_xyz + angular_std * noise_xyz
+
+                # Renormalize data based on IMU parameters
+                imu_rot_parms = loadNormParms(normParmsFile, 'noisy_rot_xyz')
+                imuData_noisy_norm = applyNorm(imuData_noisy, imu_rot_parms) # renormalize
+                imuData = imuData_noisy_norm
+
         else:
             # Original
             imuData = np.empty((0, 3))
