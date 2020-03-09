@@ -35,7 +35,7 @@ numChannels   = config.modelParms['numImageChannels']
 
 # Get Files
 checkpointFilesDict = config.trainPaths['checkpoint']
-normParmsFilesDict = config.trainPaths['normParms']
+normParmsFilesDict = config.kittiNormalized['normParms']
 truthFilesDict = config.kittiPrepared['truth']
 imuFilesDict = config.kittiPrepared['imu']
 epiFilesDict = config.kittiPrepared['epipolar']
@@ -140,10 +140,11 @@ for idx, data in enumerate(testSeqDataGen):
 
 # denormalize predictions
 normParmsFile = config.getInputFiles(normParmsFilesDict)
-with h5py.File(normParmsFile, 'r') as f:
-    truth_rot_parms = np.array(f['rot_xyz'])
-    truth_xyz_parms = np.array(f['trans_xyz'])
-    truth_polar_parms = np.array(f['trans_rtp'])
+
+truth_rot_parms   = loadNormParms(normParmsFile, 'rot_xyz')
+truth_xyz_parms   = loadNormParms(normParmsFile, 'trans_xyz')
+truth_polar_parms = loadNormParms(normParmsFile, 'trans_rtp')
+
 
 if (numOutputs == 1):
     norm_parms = truth_polar_parms[:,0:1]

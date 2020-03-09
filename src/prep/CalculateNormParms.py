@@ -5,7 +5,7 @@ import h5py
 
 
 from src.helpers.cfg import ThesisConfig
-from src.helpers.helper_functions import getNormParms, getH5pyData
+from src.helpers.helper_functions import calcNormParms, getH5pyData
 
 
 
@@ -40,7 +40,8 @@ splitFilesDict = config.kittiPrepared['split']
 truthFilesDict = config.kittiPrepared['truth']
 imuFilesDict = config.kittiPrepared['imu']
 epiFilesDict = config.kittiPrepared['epipolar']
-normParmsFilesDict = config.trainPaths['normParms']
+normParmsFilesDict = config.kittiNormalized['normParms']
+
 
 
 
