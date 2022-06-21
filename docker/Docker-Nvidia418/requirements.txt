@@ -2,7 +2,7 @@ keras
 matplotlib
 scikit-learn
 h5py
-numpy==1.16.4
+numpy==1.22.0
 opencv-contrib-python==3.3.0.9
 scikit-image
 tqdm
